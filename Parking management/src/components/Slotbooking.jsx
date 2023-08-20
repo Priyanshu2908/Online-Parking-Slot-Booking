@@ -1,9 +1,53 @@
 import React, { useEffect, useState } from 'react'
 import slotsData from './dummyData';
+import { useFormik } from 'formik';
+import Swal from 'sweetalert2';
 
 const Slotbooking = () => {
 
   const [bookedSlots, setBookedSlots] = useState([]);
+  const [selSlot, setSelSlot] = useState(null);
+
+  const slotForm = useFormik({
+    initialValues: {
+      username: '',
+      vehicle: '',
+      entry: new Date(),
+      exit: new Date(),
+      userAddress: String,
+    },
+    onSubmit: async (values) => {
+      values.slot = selSlot;
+      console.log(selSlot);
+      console.log(values);
+      // return;
+      const res = await fetch('http://localhost:5000/slot/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(values)
+      })
+      const data = await res.json();
+      console.log(data);
+
+      if (res.status === 200) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Slot Booked Successfully',
+        })
+      }else{
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Something went wrong!',
+        })
+      }
+
+    }
+  })
+
 
   const displaySlots = () => {
     return slotsData.map((lane) => (
@@ -19,8 +63,16 @@ const Slotbooking = () => {
                     <input
                       className="form-check-input mb-4"
                       type="checkbox"
-                      id="inlineCheckbox3"
-                      defaultValue="option3"
+                      checked={selSlot === slot || bookedSlots.includes(slot)}
+                      onChange={(e) => {
+                        if(bookedSlots.includes(slot)) return;
+                        console.log(e.target.checked);
+                        if(e.target.checked){
+                          setSelSlot(slot)
+                        }else{
+                          setSelSlot(null)
+                        }
+                      }}
                     />
                   </div>
                 ))
@@ -38,7 +90,7 @@ const Slotbooking = () => {
     console.log(res.status);
     const data = await res.json();
     console.log(data);
-    setBookedSlots(data);
+    setBookedSlots(data.map(slotData => slotData.slot));
   }
 
   useEffect(() => {
@@ -54,87 +106,107 @@ const Slotbooking = () => {
         <div className="row">
           <div className="col-md-6">
 
-      <div className='row'>
-        {displaySlots()}
-      </div>
+            <div className='row'>
+              {displaySlots()}
+            </div>
+          </div>
+
+          <div className="col-md-6">
+            <div className='card'>
+
+              <form onSubmit={slotForm.handleSubmit}>
+
+              
+                <h1
+                  style={{
+                    fontWeight: "bold",
+                    border: "2px solid black",
+                    textAlign: "center",
+                    backgroundColor: "blueviolet",
+                    borderRadius: 10
+                  }}
+                >
+                  Slot Booking
+                </h1>
+
+                <label style={{ marginLeft: "45%", fontWeight: "bold" }} htmlFor="">
+                  Enter Name*
+                </label>
+
+
+                <input
+                  style={{ padding: 4, marginLeft: "44%", marginRight: "44%", borderRadius: 5 }}
+                  type="text"
+                  name="username"
+                  onChange={slotForm.handleChange}
+                  value={slotForm.values.username}
+                />
+
+                <label style={{ marginLeft: "45%", fontWeight: "bold" }} htmlFor="">
+                  Enter Vehicle Number*
+                </label>
+
+
+                <input
+                  style={{ padding: 4, marginLeft: "44%", marginRight: "44%", borderRadius: 5 }}
+                  type="text"
+                  name="vehicle"
+                  onChange={slotForm.handleChange}
+                  value={slotForm.values.vehicle}
+                />
+
+
+                <label style={{ marginLeft: "45%", fontWeight: "bold" }} htmlFor="">
+                  Entry*
+                </label>
+
+
+                <input
+                  style={{ padding: 4, marginLeft: "44%", marginRight: "44%", borderRadius: 5 }}
+                  type="datetime-local"
+                  name='entry'
+                  onChange={slotForm.handleChange}
+                  value={slotForm.values.entry}
+                />
+
+
+                <label style={{ marginLeft: "45%", fontWeight: "bold" }} htmlFor="">
+                  Exit*
+                </label>
+
+
+                <input
+                  style={{ padding: 4, marginLeft: "44%", marginRight: "44%", borderRadius: 5 }}
+                  type="datetime-local"
+                  name='exit'
+                  onChange={slotForm.handleChange}
+                  value={slotForm.values.exit}
+                />
+
+
+                <label style={{ marginLeft: "45%", fontWeight: "bold" }} htmlFor="">
+                  Loacation
+                </label>
+
+
+                <input
+                  style={{ padding: 4, marginLeft: "44%", marginRight: "44%", borderRadius: 5 }}
+                  type="text"
+                  name='userAddress'
+                  onChange={slotForm.handleChange}
+                  value={slotForm.values.userAddress}
+                />
+                <>
+                  <br />
+                  <button style={{marginLeft: 380, marginTop:32}} className='btn btn-primary'>Submit</button>
+                </>
+                </form>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className='card'>
 
-      <>
-        <h1
-          style={{
-            fontWeight: "bold",
-            border: "2px solid black",
-            textAlign: "center",
-            backgroundColor: "blueviolet",
-            borderRadius: 10
-          }}
-        >
-          Slot Booking
-        </h1>
-
-        <label style={{ marginLeft: "45%", fontWeight: "bold" }} htmlFor="">
-          Enter Vehicle Number*
-        </label>
-
-
-        <input
-          style={{ padding: 4, marginLeft: "44%", marginRight: "44%", borderRadius: 5 }}
-          type="text"
-        />
-
-
-        <label style={{ marginLeft: "45%", fontWeight: "bold" }} htmlFor="">
-          Entry*
-        </label>
-
-
-        <input
-          style={{ padding: 4, marginLeft: "44%", marginRight: "44%", borderRadius: 5 }}
-          type="date&time"
-        />
-
-
-        <label style={{ marginLeft: "45%", fontWeight: "bold" }} htmlFor="">
-          Exit*
-        </label>
-
-
-        <input
-          style={{ padding: 4, marginLeft: "44%", marginRight: "44%", borderRadius: 5 }}
-          type="date&time"
-        />
-
-
-        <label style={{ marginLeft: "45%", fontWeight: "bold" }} htmlFor="">
-          Place*
-        </label>
-
-
-        <input
-          style={{ padding: 4, marginLeft: "44%", marginRight: "44%", borderRadius: 5 }}
-          type="text"
-        />
-        <>
-          <br />
-          <button className='btnp btn-Danger'>Submit</button>
-
-        </>
-        <hr />
-        
-
-
-
-
-
-      </>
-
-
-
-    </div>
     </div>
   )
 }

@@ -8,7 +8,7 @@ const port = 5000;
 const cors = require('cors');
 
 // import routers
-const UserRouter = require('./routers/Slotbooking');
+const UserRouter = require('./routers/UserRouter');
 const SlotRouter = require('./routers/Slotbooking');
 const UtilRouter = require('./routers/util');
 
